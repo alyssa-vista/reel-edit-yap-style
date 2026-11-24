@@ -1,0 +1,315 @@
+[
+ {
+  "id": "palette",
+  "q": "Your brand colors",
+  "help": "Pick a set, type your own hex codes, or upload your brand kit.",
+  "type": "palette",
+  "pick": 1,
+  "options": [
+   {
+    "id": "butter",
+    "name": "Butter",
+    "colors": [
+     "#F1C92F",
+     "#FFF4C1",
+     "#FFFFFF"
+    ]
+   },
+   {
+    "id": "cherry",
+    "name": "Cherry",
+    "colors": [
+     "#E23B4E",
+     "#FFD9D2",
+     "#FFFFFF"
+    ]
+   },
+   {
+    "id": "matcha",
+    "name": "Matcha",
+    "colors": [
+     "#8DB04A",
+     "#EAF3D3",
+     "#FFFFFF"
+    ]
+   },
+   {
+    "id": "sky",
+    "name": "Sky",
+    "colors": [
+     "#4DA3FF",
+     "#DDF0FF",
+     "#FFFFFF"
+    ]
+   },
+   {
+    "id": "lilac",
+    "name": "Lilac",
+    "colors": [
+     "#B58CFF",
+     "#EFE6FF",
+     "#FFFFFF"
+    ]
+   },
+   {
+    "id": "peach",
+    "name": "Peach",
+    "colors": [
+     "#FF9466",
+     "#FFE6D6",
+     "#FFFFFF"
+    ]
+   },
+   {
+    "id": "bubblegum",
+    "name": "Bubblegum",
+    "colors": [
+     "#FF6FB5",
+     "#FFE0F0",
+     "#FFFFFF"
+    ]
+   },
+   {
+    "id": "espresso",
+    "name": "Espresso",
+    "colors": [
+     "#B07B4F",
+     "#F3E6D8",
+     "#FFFFFF"
+    ]
+   },
+   {
+    "id": "mono",
+    "name": "Black and white",
+    "colors": [
+     "#FFFFFF",
+     "#E8E8E8",
+     "#FFFFFF"
+    ]
+   },
+   {
+    "id": "lime",
+    "name": "Electric lime",
+    "colors": [
+     "#D6FF3D",
+     "#F4FFD0",
+     "#FFFFFF"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "font",
+  "q": "Pick your main font",
+  "help": "This is the font for most of your captions.",
+  "type": "font",
+  "pick": 1,
+  "options": [
+   "Inter Tight",
+   "Poppins",
+   "Montserrat",
+   "DM Sans",
+   "Outfit",
+   "League Spartan",
+   "Space Grotesk",
+   "Nunito",
+   "Syne",
+   "Anton",
+   "Bebas Neue",
+   "Archivo Black",
+   "Playfair Display",
+   "Cormorant Garamond",
+   "Lora",
+   "Special Elite",
+   "Bangers",
+   "VT323"
+  ]
+ },
+ {
+  "id": "accent",
+  "q": "Pick a font for your special words",
+  "help": "The big words that matter most.",
+  "type": "font",
+  "pick": 1,
+  "options": [
+   "Instrument Serif:ital",
+   "Playfair Display:ital",
+   "Bodoni Moda:ital",
+   "Cormorant Garamond:ital",
+   "Pinyon Script",
+   "Dancing Script",
+   "Caveat",
+   "Pacifico",
+   "Permanent Marker",
+   "Same as my main font"
+  ]
+ },
+ {
+  "id": "photos",
+  "q": "What kind of photos?",
+  "help": "Pick 1 to 4.",
+  "type": "cards",
+  "from": "photo",
+  "pick": 4
+ },
+ {
+  "id": "photoLook",
+  "q": "How should photos look on screen?",
+  "help": "Pick 1 or 2.",
+  "type": "look",
+  "pick": 2,
+  "options": [
+   {
+    "id": "frame",
+    "name": "Photo with a border"
+   },
+   {
+    "id": "sticker",
+    "name": "Cut out like a sticker"
+   },
+   {
+    "id": "polaroid",
+    "name": "Polaroid"
+   },
+   {
+    "id": "torn",
+    "name": "Torn paper"
+   },
+   {
+    "id": "full",
+    "name": "Full screen"
+   }
+  ]
+ },
+ {
+  "id": "gifs",
+  "q": "What kind of GIFs?",
+  "help": "Pick 1 to 4. A GIF here is a short clip that moves.",
+  "type": "cards",
+  "from": "gif",
+  "pick": 4,
+  "none": "No GIFs"
+ },
+ {
+  "id": "emoji",
+  "q": "Do you want emojis?",
+  "help": "You can always remove one later.",
+  "type": "big",
+  "pick": 1,
+  "options": [
+   {
+    "id": "lots",
+    "name": "Yes, a lot",
+    "say": "😂 💔 🐢 ✨"
+   },
+   {
+    "id": "few",
+    "name": "Just a few",
+    "say": "💔"
+   },
+   {
+    "id": "none",
+    "name": "No emojis",
+    "say": "–"
+   }
+  ]
+ },
+ {
+  "id": "captions",
+  "q": "How should your captions move?",
+  "help": "Watch each one, then pick.",
+  "type": "caption",
+  "pick": 1,
+  "options": [
+   {
+    "id": "all-fast",
+    "name": "All over, fast"
+   },
+   {
+    "id": "all-calm",
+    "name": "All over, calm"
+   },
+   {
+    "id": "center-word",
+    "name": "Center, word by word"
+   },
+   {
+    "id": "center-line",
+    "name": "Center, one line at a time"
+   },
+   {
+    "id": "center-box",
+    "name": "Center, in a box"
+   }
+  ]
+ },
+ {
+  "id": "behind",
+  "q": "Should photos and GIFs go behind your head?",
+  "help": "They slide in between you and your wall.",
+  "type": "behind",
+  "pick": 1,
+  "options": [
+   {
+    "id": "lots",
+    "name": "Yes, a lot"
+   },
+   {
+    "id": "some",
+    "name": "Sometimes"
+   },
+   {
+    "id": "never",
+    "name": "No, keep them beside me"
+   }
+  ]
+ },
+ {
+  "id": "busy",
+  "q": "How many pictures in your video?",
+  "help": "Photos and GIFs together.",
+  "type": "big",
+  "pick": 1,
+  "options": [
+   {
+    "id": "calm",
+    "name": "A few",
+    "say": "About one every 8 seconds"
+   },
+   {
+    "id": "medium",
+    "name": "Medium",
+    "say": "About one every 4 seconds"
+   },
+   {
+    "id": "full",
+    "name": "A lot",
+    "say": "About one every 2 seconds"
+   }
+  ]
+ },
+ {
+  "id": "sound",
+  "q": "Do you want sound effects?",
+  "help": "Little pops and swooshes when something shows up.",
+  "type": "big",
+  "pick": 1,
+  "options": [
+   {
+    "id": "yes",
+    "name": "Yes",
+    "say": "Pop, swoosh"
+   },
+   {
+    "id": "soft",
+    "name": "Yes, but quiet",
+    "say": "Soft pops"
+   },
+   {
+    "id": "no",
+    "name": "No, only my voice",
+    "say": "–"
+   }
+  ]
+ }
+]

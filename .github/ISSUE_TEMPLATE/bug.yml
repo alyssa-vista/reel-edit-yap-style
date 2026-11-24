@@ -1,0 +1,15 @@
+name: Something is broken
+description: Tell us what happened
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes: { label: What happened?, description: Please do not paste private videos, passwords or keys. }
+    validations: { required: true }
+  - type: dropdown
+    id: os
+    attributes: { label: Your computer, options: [Mac with Apple chip, Mac with Intel chip, Windows] }
+    validations: { required: true }
+  - type: textarea
+    id: said
+    attributes: { label: What did you say to Claude? }

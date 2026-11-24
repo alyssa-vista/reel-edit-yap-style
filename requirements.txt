@@ -1,0 +1,6 @@
+faster-whisper==1.2.1
+numpy==2.4.4
+opencv-python-headless==5.0.0.93
+skia-python==144.0.post2
+soundfile==0.14.0
+static-ffmpeg==3.0

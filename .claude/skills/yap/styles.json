@@ -1,0 +1,326 @@
+{
+ "photo": [
+  {
+   "id": "cinematic",
+   "name": "Cinematic",
+   "say": "Moody, like a film scene",
+   "src": "unsplash",
+   "add": "fog night",
+   "ex": "foggy road",
+   "tool": "Wikimedia Commons (Unsplash set), then Openverse"
+  },
+  {
+   "id": "soft",
+   "name": "Soft and aesthetic",
+   "say": "Cozy, light, Pinterest-like",
+   "src": "unsplash",
+   "add": "",
+   "ex": "coffee flowers book",
+   "tool": "Wikimedia Commons (Unsplash set), then Openverse"
+  },
+  {
+   "id": "minimal",
+   "name": "Minimal",
+   "say": "One thing, lots of empty space",
+   "src": "unsplash",
+   "add": "minimal",
+   "ex": "white chair",
+   "tool": "Wikimedia Commons (Unsplash set), then Openverse"
+  },
+  {
+   "id": "city",
+   "name": "City nights",
+   "say": "Lights, streets, skylines",
+   "src": "unsplash",
+   "add": "city night",
+   "ex": "city lights",
+   "tool": "Wikimedia Commons (Unsplash set), then Openverse"
+  },
+  {
+   "id": "nature",
+   "name": "Nature and sky",
+   "say": "Oceans, clouds, mountains",
+   "src": "unsplash",
+   "add": "nature",
+   "ex": "ocean waves",
+   "tool": "Wikimedia Commons (Unsplash set), then Openverse"
+  },
+  {
+   "id": "oldhollywood",
+   "name": "Old Hollywood",
+   "say": "Black and white movie stars",
+   "src": "commons",
+   "add": "film still 1930s",
+   "ex": "film still 1930s actress",
+   "tool": "Wikimedia Commons"
+  },
+  {
+   "id": "movieshots",
+   "name": "Movie screenshots",
+   "say": "Scenes from classic color movies",
+   "src": "films",
+   "add": "color",
+   "ex": "charade",
+   "icon": "🎬",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "silent",
+   "name": "Silent movie",
+   "say": "Chaplin and Keaton era",
+   "src": "films",
+   "add": "silent",
+   "ex": "tramp",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "vintage",
+   "name": "Vintage photos",
+   "say": "Real old photographs",
+   "src": "openverse",
+   "add": "vintage photograph",
+   "ex": "1920s photograph woman",
+   "tool": "Openverse"
+  },
+  {
+   "id": "retroads",
+   "name": "Retro ads",
+   "say": "Old magazine ads",
+   "src": "openverse",
+   "add": "vintage advertisement",
+   "ex": "1950s advertisement magazine",
+   "tool": "Openverse"
+  },
+  {
+   "id": "posters",
+   "name": "Vintage posters",
+   "say": "Travel and event posters",
+   "src": "commons",
+   "add": "WPA poster",
+   "ex": "WPA poster national park",
+   "tool": "Wikimedia Commons"
+  },
+  {
+   "id": "paintings",
+   "name": "Classic paintings",
+   "say": "Museum art",
+   "src": "cma",
+   "add": "Painting",
+   "ex": "woman portrait",
+   "tool": "Cleveland Museum of Art, then Wikimedia Commons"
+  },
+  {
+   "id": "ink",
+   "name": "Ink drawings",
+   "say": "Simple black lines",
+   "src": "cma",
+   "add": "Drawing",
+   "ex": "tree",
+   "tool": "Cleveland Museum of Art, then Wikimedia Commons"
+  },
+  {
+   "id": "cartoon",
+   "name": "Old cartoons",
+   "say": "1920s and 30s cartoons",
+   "src": "films",
+   "add": "cartoon",
+   "ex": "felix",
+   "icon": "🐈‍⬛",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "comic",
+   "name": "Comic strips",
+   "say": "Old newspaper comics",
+   "src": "commons",
+   "add": "comic strip 1910s",
+   "ex": "Little Nemo comic",
+   "tool": "Wikimedia Commons"
+  },
+  {
+   "id": "meme",
+   "name": "Memes",
+   "say": "The classic meme pictures",
+   "src": "memes",
+   "add": "",
+   "ex": "distracted",
+   "icon": "😹",
+   "tool": "memegen.link"
+  },
+  {
+   "id": "paper",
+   "name": "Letters and paper",
+   "say": "Old letters, newspapers, scraps",
+   "src": "commons",
+   "add": "handwritten letter manuscript",
+   "ex": "old handwritten letter 1800s",
+   "tool": "Wikimedia Commons"
+  },
+  {
+   "id": "flowers",
+   "name": "Flowers and butterflies",
+   "say": "Old botanical art",
+   "src": "commons",
+   "add": "botanical illustration",
+   "ex": "Redoute roses illustration",
+   "tool": "Wikimedia Commons"
+  },
+  {
+   "id": "space",
+   "name": "Space",
+   "say": "Stars, planets, rockets",
+   "src": "nasa",
+   "add": "",
+   "ex": "galaxy",
+   "tool": "NASA"
+  },
+  {
+   "id": "icons",
+   "name": "Simple icons",
+   "say": "Clean little drawings",
+   "src": "icons",
+   "add": "",
+   "icon": "💡",
+   "tool": "Iconify"
+  }
+ ],
+ "gif": [
+  {
+   "id": "silentcomedy",
+   "name": "Silent comedy",
+   "say": "Chaplin, Keaton, falling down",
+   "src": "films",
+   "add": "silent",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "colormovie",
+   "name": "Classic color movies",
+   "say": "1950s and 60s movie scenes",
+   "src": "films",
+   "add": "color",
+   "icon": "🎬",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "oldcartoon",
+   "name": "Old cartoons",
+   "say": "1920s and 30s, bouncy",
+   "src": "films",
+   "add": "cartoon",
+   "icon": "🐈‍⬛",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "reaction",
+   "name": "Reaction faces",
+   "say": "Shocked, crying, side eye",
+   "src": "films",
+   "add": "reaction",
+   "icon": "😱",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "anime",
+   "name": "Anime reactions",
+   "say": "Crying, laughing, shocked",
+   "src": "anime",
+   "add": "",
+   "icon": "🌸",
+   "tool": "nekos.best"
+  },
+  {
+   "id": "schoolfilm",
+   "name": "1950s school films",
+   "say": "Awkward and funny",
+   "src": "films",
+   "add": "",
+   "icon": "🏫",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "ninetiesweb",
+   "name": "90s internet",
+   "say": "Pixel, glitter, spinning",
+   "src": "gifcities",
+   "add": "",
+   "icon": "👾",
+   "tool": "GifCities"
+  },
+  {
+   "id": "meme",
+   "name": "Moving memes",
+   "say": "Meme pictures that zoom and shake",
+   "src": "memes",
+   "add": "",
+   "icon": "😹",
+   "tool": "memegen.link"
+  },
+  {
+   "id": "dance",
+   "name": "Dance and party",
+   "say": "People dancing, old clips",
+   "src": "films",
+   "add": "dance",
+   "icon": "🪩",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "sports",
+   "name": "Sports and races",
+   "say": "Running, winning, losing",
+   "src": "films",
+   "add": "race sport",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "animals",
+   "name": "Animals",
+   "say": "Cats, dogs, birds",
+   "src": "films",
+   "add": "animal",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "nature",
+   "name": "Nature loops",
+   "say": "Waves, rain, clouds",
+   "src": "films",
+   "add": "nature",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "city",
+   "name": "City loops",
+   "say": "Streets, trains, traffic",
+   "src": "films",
+   "add": "city street",
+   "tool": "Internet Archive"
+  },
+  {
+   "id": "space",
+   "name": "Space",
+   "say": "Rockets and planets",
+   "src": "nasavideo",
+   "add": "",
+   "tool": "NASA"
+  },
+  {
+   "id": "spin",
+   "name": "Old spinning drawings",
+   "say": "1800s animation discs",
+   "src": "commonsgif",
+   "add": "phenakistiscope",
+   "tool": "Wikimedia Commons"
+  },
+  {
+   "id": "emoji",
+   "name": "Moving emojis",
+   "say": "Emojis that wiggle and pop",
+   "src": "emoji",
+   "add": "",
+   "icon": "🥹",
+   "tool": "Noto Emoji Animation (Google)"
+  }
+ ]
+}

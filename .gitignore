@@ -1,0 +1,26 @@
+# people's own videos and settings never go to GitHub
+raw/*
+final/*
+work/
+!raw/.gitkeep
+!final/.gitkeep
+my-style.json
+brand/
+*.mp4
+*.mov
+*.MOV
+*.MP4
+!.claude/skills/yap/survey/img/*.mp4
+# keys and private settings
+.env
+.env.*
+*.pem
+*.key
+.claude/settings.local.json
+# machine files
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+.venv/
+node_modules/
