@@ -173,7 +173,25 @@ def cut(i, t, s, out):
         ],
         180,
     )
-    print(out, os.path.getsize(out) // 1000, "kB")
+    strip = os.path.splitext(out)[0] + " check.jpg"
+    run(
+        [
+            FFMPEG,
+            "-v",
+            "error",
+            "-y",
+            "-i",
+            out,
+            "-vf",
+            "fps=4,scale=150:-2,tile=8x1",
+            "-frames:v",
+            "1",
+            "-update",
+            "1",
+            strip,
+        ]
+    )
+    print(out, os.path.getsize(out) // 1000, "kB; LOOK at", strip)
 
 
 if __name__ == "__main__":

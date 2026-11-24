@@ -146,11 +146,22 @@ class Sprite(Element):
         super().__init__(t0, t1, behind, z)
         self.images, self.x, self.y, self.w, self.tilt = images, x, y, w, tilt
         self.enter, self.wiggle, self.shadow = enter, wiggle, shadow
+        self.path = []  # [(time, x, y, tilt)]: places it glides to later
+        self.flip = False
+
+    def place(self, t, glide=0.32):
+        """where it is at t; glide=0 gives the place it is heading to"""
+        x, y, tilt = self.x, self.y, self.tilt
+        for at, nx, ny, ntilt in self.path:
+            if t >= at - 1e-6:
+                k = ease(part(t, at, glide)) if glide else 1.0
+                x, y, tilt = x + (nx - x) * k, y + (ny - y) * k, tilt + (ntilt - tilt) * k
+        return x, y, tilt
 
     def draw(self, c, t):
         life = t - self.t0
         image = self.images[int(life * 12 + 1e-6) % len(self.images)]
-        x, y, tilt, scale, alpha, blur = self.x, self.y, self.tilt, 1.0, 1.0, 0.0
+        (x, y, tilt), scale, alpha, blur = self.place(t), 1.0, 1.0, 0.0
         p = part(t, self.t0, 0.28)
         if self.enter == "pop":
             scale, alpha = (0.25 + 0.75 * spring(p)) if p < 1 else 1.0, min(1, p * 5)
@@ -166,7 +177,7 @@ class Sprite(Element):
         c.save()
         c.translate(x, y)
         c.rotate(tilt)
-        c.scale(k, k)
+        c.scale(-k if self.flip else k, k)
         paint = skia.Paint(AntiAlias=True, Alphaf=alpha)
         effect = (
             skia.ImageFilters.DropShadow(0, 10 / k, 16 / k, 16 / k, colour(SHADOW, self.shadow * alpha))
@@ -259,8 +270,34 @@ def torn(im, seed):
     return np.dstack([rgb.astype(np.uint8), paper])
 
 
-def dress(im, look, w, h, edge):
+def level(pics):
+    """old films are often grey and dark: stretch to a clean black and white, then lift the middle, the same for every frame"""
+    light = np.stack([cv2.resize(p[..., :3], (64, 48), interpolation=cv2.INTER_AREA).mean(2) for p in pics]) / 255
+    lo, hi = np.percentile(light, 2), max(np.percentile(light, 98.5), 0.3)
+    middle = float(np.clip((light - lo) / (hi - lo), 0.01, 1).mean())
+    gamma = float(np.clip(np.log(0.42) / np.log(max(middle, 0.02)), 0.5, 1.1))
+    table = (np.clip((np.arange(256) / 255 - lo) / (hi - lo), 0, 1) ** gamma * 245 + 5).astype(np.uint8)
+    out = []
+    for p in pics:
+        q = p.copy()
+        q[..., :3] = table[p[..., :3]]
+        out.append(q)
+    return out
+
+
+def fade_low(im, amount):
+    """darkens the lower part so words can sit on the picture"""
+    rows = np.linspace(0, 1, im.shape[0])
+    k = 1 - amount * np.clip((rows - 0.45) / 0.4, 0, 1)
+    out = im.copy()
+    out[..., :3] = (im[..., :3] * k[:, None, None]).astype(np.uint8)
+    return out
+
+
+def dress(im, look, w, h, edge, fade=0.0):
     """puts one RGBA picture into the chosen look"""
+    if fade and look != "sticker":
+        im = fade_low(crop(im, w, h), fade)
     if look == "full":
         return crop(im, W, H)
     if look == "polaroid":

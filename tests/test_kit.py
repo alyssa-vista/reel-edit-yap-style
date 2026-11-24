@@ -151,5 +151,78 @@ class Survey(unittest.TestCase):
         self.assertEqual(d["font"], "Poppins")
 
 
+try:
+    import cv2
+    import numpy as np
+    import skia
+
+    sys.path.insert(0, os.path.join(K, "scripts"))
+    import draw
+    import layout
+except (ImportError, SystemExit):
+    layout = None
+
+
+@unittest.skipUnless(layout, "the drawing tools are not installed here")
+class Balance(unittest.TestCase):
+    """one picture sits in the middle, two mirror each other, three stay balanced"""
+
+    def setUp(self):
+        draw.TYPE.update(sans=skia.Typeface(), accent=skia.Typeface(), emoji=skia.Typeface())
+        draw.emoji.cache_clear()
+        self.tmp = tempfile.TemporaryDirectory()
+        self.pic = os.path.join(self.tmp.name, "p.png")
+        cv2.imwrite(self.pic, np.full((300, 400, 3), 90, np.uint8))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def make(self, count, plan=None, emoji=None, behind="some", look="frame", face=None):
+        words = [dict(i=i, word=f"w{i}", start=i * 0.4, end=i * 0.4 + 0.3) for i in range(8)]
+        face = face or dict(x=296, y=853, w=466, h=664, top=763, chin=1517, found=True)
+        style = dict(
+            colors=dict(primary="#F1C92F", secondary="#FFF4C1", text="#FFFFFF"),
+            photoLook=[look],
+            captions="all-calm",
+            behind=behind,
+            emoji="few",
+        )
+        beat = dict(
+            say=[0, 7], strong=[4], pictures=[dict(file=self.pic, at=1 + 2 * k) for k in range(count)], layout=plan
+        )
+        if emoji:
+            beat["emoji"] = emoji
+        return layout.Layout(dict(face=face, seconds=4), words, style, dict(beats=[beat]), self.tmp.name).build()
+
+    def check(self, made, name):
+        for n in range(0, 40):
+            if abs(made.lean(n / 10)) > 70 and abs(made.lean(n / 10 + 0.25)) > 70:
+                self.fail(f"{name} leans {made.lean(n / 10):.0f} px at {n / 10}")
+
+    def test_never_leans(self):
+        small = dict(x=430, y=500, w=220, h=300, top=420, chin=800, found=True)
+        side = dict(x=600, y=853, w=400, h=500, top=700, chin=1353, found=True)
+        for face in (None, small, side):
+            for behind in ("lots", "some", "never"):
+                for look in ("frame", "polaroid", "torn", "full", "sticker"):
+                    for count, plans in ((0, [None]), (1, [None]), (2, ["sides", "pair"]), (3, ["fan", "triangle"])):
+                        for plan in plans:
+                            for emoji in (None, "o", ["o", "x"]):
+                                self.check(
+                                    self.make(count, plan, emoji, behind, look, face),
+                                    (count, plan, emoji, behind, look),
+                                )
+
+    def test_one_picture_is_in_the_middle(self):
+        made = [e for e in self.make(1).items if isinstance(e, draw.Sprite)]
+        self.assertEqual([e.x for e in made], [540])
+
+    def test_two_pictures_mirror(self):
+        for plan in ("sides", "pair"):
+            a, b = [e for e in self.make(2, plan).items if isinstance(e, draw.Sprite)]
+            self.assertAlmostEqual(a.x + b.x, 1080, delta=1)
+            self.assertEqual((a.y, a.tilt), (b.y, -b.tilt))
+
+
 if __name__ == "__main__":
     unittest.main()

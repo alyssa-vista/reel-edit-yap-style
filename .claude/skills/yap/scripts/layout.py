@@ -22,7 +22,8 @@ class Layout:
         self.primary, self.secondary, self.text = colors["primary"], colors["secondary"], colors["text"]
         looks = style["photoLook"]
         self.looks = looks if isinstance(looks, list) else [looks]
-        self.pictures = self.side = 0
+        self.pictures = self.scenes = 0
+        self.turns, self.area = {}, None
 
     # -------------------------------------------------- helpers
     def word(self, i):
@@ -38,7 +39,9 @@ class Layout:
         return self.end
 
     def zone(self):
-        """the free area for words: above the head if there is room, else under the chin"""
+        """the free area for words: on the pictures of this beat, else above the head, else under the chin"""
+        if self.area:
+            return self.area
         above = self.face["top"] - 20 - TOP
         if above >= 230:
             return TOP, self.face["top"] - 20
@@ -83,7 +86,7 @@ class Layout:
             if p.ndim == 2:
                 p = cv2.cvtColor(p, cv2.COLOR_GRAY2BGR)
             out.append(cv2.cvtColor(p, cv2.COLOR_BGRA2RGBA if p.shape[2] == 4 else cv2.COLOR_BGR2RGBA))
-        return out
+        return draw.level(out) if len(out) > 1 else out
 
     def cutout(self, path):
         """lifts the subject out of a photo: Apple Vision on a Mac, rembg elsewhere"""
@@ -101,61 +104,139 @@ class Layout:
             pass
         return path
 
-    def add_picture(self, path, t0, t1, behind, look):
-        self.pictures += 1
-        self.side = 1 - self.side
-        moving = os.path.splitext(path)[1].lower() in (".mp4", ".webm", ".gif", ".mov", ".webp")
-        if look == "sticker" and not moving:
-            path = self.cutout(path)
-        pics = self.picture_files(path)
-        if look == "full":
-            self.items += [
-                Sprite(
-                    [to_image(draw.dress(p, "full", 0, 0, "")) for p in pics],
-                    t0,
-                    t1,
-                    540,
-                    960,
-                    1080,
-                    enter="cut",
-                    wiggle=0,
-                    z=4,
-                    shadow=0,
-                ),
-                Shade(t0, t1),
-            ]
-            return "full"
-        ih, iw = pics[0].shape[:2]
-        shape = max(0.7, min(1.5, iw / ih))
-        w = 600 if behind else 380
-        h = int(w / shape)
-        if h > (460 if behind else 430):
-            h = 460 if behind else 430
-            w = int(h * shape)
-        images = [to_image(draw.dress(p, look, w, h, self.secondary)) for p in pics]
-        tilt = 4 if self.side else -4
-        if behind:
-            # off to one side and raised, so the head covers a corner and not the subject
-            x = 540 + (1 if self.side else -1) * min(230, 500 - w / 2)
-            y = max(self.face["top"] - 40, TOP + 250 + h / 2)
-            self.items.append(Sprite(images, t0, t1, x, y, w, tilt, "up", 0.6, True, 2))
-            return y - h / 2 - 55
-        x = RIGHT - 150 if self.side else LEFT + 150
-        y = min(LOW - h / 2 + 60, self.face["chin"] + 60 + h / 2)
-        # never over the face: if the corner is too narrow, sit lower
-        if self.face["x"] < x + w / 2 and x - w / 2 < self.face["x"] + self.face["w"] and y - h / 2 < self.face["chin"]:
-            y = self.face["chin"] + 30 + h / 2
-        self.items.append(Sprite(images, t0, t1, x, y, w, tilt, "right" if self.side else "left", 1.0, False, 3))
-        return None
-
-    def add_emoji(self, char, t0, t1, behind):
-        image = emoji(char)
-        if image is None:
-            return
-        x = 150 if self.side else 930
-        self.items.append(
-            Sprite([image], t0, t1, x, self.face["top"] + 70, 175, 8 if self.side else -8, "pop", 2.2, behind, 6, 0.35)
+    # -------------------------------------------------- balanced places
+    # one picture: the middle.  two: mirrored left and right.  three: a fan or a triangle.
+    def slots(self, count, behind, plan):
+        """returns (places, behind, words start, words end); a place is (x, y, w, h, tilt, front)"""
+        head, face = self.face["top"], self.face
+        top, low = TOP - 20, (head + 60 if behind else head - 30)
+        if low - top < 300:  # the head is high: use the full screen or the space under the chin
+            top, low = face["chin"] + 40, max(face["chin"] + 480, LOW)
+        room = low - top
+        lean = 1 if self.scenes % 2 else -1
+        if count == 1:
+            h = min(580, room)
+            return (
+                "card",
+                [(540, low - h / 2, min(880, int(h * 1.6)), int(h), 1.2 * lean, 0)],
+                behind,
+                low - h * 0.46,
+                head - 12,
+            )
+        side = min(400, face["x"] + 22, 1080 - face["x"] - face["w"] + 22)
+        can_side = face["found"] and side >= 230
+        y_side = min(face["chin"] - 70, 1480)
+        sides = [
+            (side / 2 - 22, y_side, side, int(side * 1.15), -6, 0),
+            (1102 - side / 2, y_side, side, int(side * 1.15), 6, 0),
+        ]
+        if count == 2:
+            names = [plan] if plan else (["sides", "pair"] if can_side else ["pair"])
+            name = names[self.turns.get(2, 0) % len(names)]
+            if name == "sides" and can_side:
+                return "sides", sides, False, TOP, head - 20
+            h = min(430, room - 20)
+            w = min(455, int(h * 1.15))
+            y = low - h / 2 - 40
+            return (
+                "pair",
+                [(540 - w * 0.53, y, w, int(h), -4, 0), (540 + w * 0.53, y, w, int(h), 4, 0)],
+                behind,
+                low - h * 0.46,
+                head - 12,
+            )
+        names = [plan] if plan else (["fan", "triangle"] if can_side else ["fan"])
+        name = names[self.turns.get(3, 0) % len(names)]
+        if name == "triangle" and can_side:
+            h = min(430, room - 20)
+            return (
+                "triangle",
+                sides + [(540, low - h / 2, int(h * 1.5), int(h), 1.0, 0)],
+                behind,
+                low - h * 0.46,
+                head - 12,
+            )
+        h = min(400, room - 70)
+        w, y = int(h * 1.32), low - h / 2 - 70
+        return (
+            "fan",
+            [(540 - 235, y, w, int(h), -6, 0), (540 + 235, y, w, int(h), 6, 0), (540, y + 62, w, int(h), -1, 1)],
+            behind,
+            y + 20,
+            head - 12,
         )
+
+    def add_scene(self, pictures, t1, behind, plan):
+        """all the pictures of one beat, placed so the screen never leans to one side"""
+        count = min(3, len(pictures))
+        pictures = pictures[:count]
+        if count == 1 and (pictures[0]["look"] == "full" or plan == "full"):
+            frames = [to_image(draw.dress(p, "full", 0, 0, "")) for p in self.picture_files(pictures[0]["file"])]
+            self.items += [
+                Sprite(frames, pictures[0]["t"], t1, 540, 960, 1080, enter="cut", wiggle=0, z=4, shadow=0),
+                Shade(pictures[0]["t"], t1),
+            ]
+            self.scenes += 1
+            return (760, 1180) if self.face["top"] > 700 else (TOP, self.face["top"] - 20)
+        name, places, behind, words_top, words_low = self.slots(count, behind, plan)
+        self.turns[count] = self.turns.get(count, 0) + 1
+        self.scenes += 1
+        times = [p["t"] for p in pictures]
+        if name in ("sides", "triangle", "pair"):
+            times = [times[0] + 0.1 * i for i in range(count)]
+        fade = 0.0 if name == "sides" else 0.62
+        sprites = []
+        for i, (pic, (x, y, w, h, tilt, front)) in enumerate(zip(pictures, places)):
+            path, moving = pic["file"], os.path.splitext(pic["file"])[1].lower() in (
+                ".mp4",
+                ".webm",
+                ".gif",
+                ".mov",
+                ".webp",
+            )
+            look = pic["look"] if pic["look"] != "full" else "frame"
+            if look == "sticker" and not moving:
+                path = self.cutout(path)
+            low_place = name == "triangle" and i < 2
+            frames = [
+                to_image(draw.dress(p, look, int(w), int(h), self.secondary, 0.0 if low_place else fade))
+                for p in self.picture_files(path)
+            ]
+            hidden = behind and not low_place
+            # in front of the person a middle picture pops in place, so it never flies over the face
+            enter = ("up" if hidden else "pop") if x == 540 else ("left" if x < 540 else "right")
+            sprites.append(
+                Sprite(frames, times[i], t1, x, y, w, tilt, enter, 0.35, behind and not low_place, 2 + i * 0.1)
+            )
+        if name == "fan":  # early pictures wait in the middle, then make room
+            middle, gap = (540, places[0][1], 0), 0.12
+            for i, s in enumerate(sprites):
+                later = [t for t in times[i + 1 :] if t - times[i] > gap]
+                if i == 0 and later:
+                    s.path = [(later[0], *places[0][:2], places[0][4])]
+                    s.x, s.y, s.tilt = middle
+                    s.enter = "up" if s.behind else "pop"
+        self.items += sprites
+        return words_top, words_low
+
+    def add_emoji(self, chars, t0, t1, alone):
+        """one emoji alone peeks over the head in the middle; next to pictures it comes as a mirrored pair"""
+        chars = list(chars)[:2] if isinstance(chars, list) else [chars]
+        images = [emoji(c) for c in chars]
+        if not all(images):
+            return
+        head = self.face["top"]
+        if len(images) == 1 and alone:
+            peek = self.style["behind"] != "never"
+            self.items.append(
+                Sprite(images, t0, t1, 540, head - 100, 220, 0, "up" if peek else "pop", 1.6, peek, 6, 0.35)
+            )
+            return
+        pair = images if len(images) == 2 else images * 2
+        for image, x, tilt, flip in ((pair[0], 118, -10, True), (pair[1], 962, 10, False)):
+            s = Sprite([image], t0, t1, x, head + 120, 165, tilt, "pop", 1.8, False, 6, 0.35)
+            s.flip = flip and pair[0] is pair[1]
+            self.items.append(s)
 
     # -------------------------------------------------- words
     def groups(self, a, b, strong, most):
@@ -163,6 +244,8 @@ class Layout:
         for i in range(a, b + 1):
             cur.append(i)
             ends = self.words[i]["word"].endswith((".", ",", "?", "!", ":"))
+            # on a picture a strong word closes its group, so it can be big
+            ends = ends or (self.area is not None and i in strong)
             if (
                 len(cur) >= most
                 or ends
@@ -173,9 +256,8 @@ class Layout:
                 cur = []
         return out
 
-    def say_center(self, a, b, strong, mode, ceiling):
+    def say_center(self, a, b, strong, mode):
         top, bottom = self.zone()
-        bottom = min(bottom, ceiling) if ceiling else bottom
         for g in [[i] for i in range(a, b + 1)] if mode == "center-word" else self.groups(a, b, strong, 4):
             text = " ".join(self.word(i) for i in g)
             hot = any(i in strong for i in g)
@@ -202,10 +284,9 @@ class Layout:
                 )
             )
 
-    def say_calm(self, a, b, strong, ceiling):
+    def say_calm(self, a, b, strong):
         top, bottom = self.zone()
-        bottom = max(top + 150, min(bottom, ceiling)) if ceiling else bottom
-        for g in self.groups(a, b, strong, 3 if ceiling else 5):
+        for g in self.groups(a, b, strong, 4 if self.area else 5):
             rows, row = [], []
             for i in g:
                 if i in strong:
@@ -244,9 +325,8 @@ class Layout:
                     )
                     x += w + gap
 
-    def say_fast(self, a, b, strong, ceiling):
+    def say_fast(self, a, b, strong):
         top, bottom = self.zone()
-        bottom = max(top + 170, min(bottom, ceiling)) if ceiling else bottom
         spots = [(0.30, 0.22), (0.68, 0.55), (0.5, 0.9), (0.66, 0.2), (0.32, 0.6)]
         moves = ["pop", "right", "rise", "left", "pop"]
         for n, g in enumerate(self.groups(a, b, strong, 2)):
@@ -273,38 +353,78 @@ class Layout:
             )
 
     # -------------------------------------------------- all beats
+    def beat_pictures(self, beat):
+        a = beat["say"][0]
+        listed = beat.get("pictures") or [
+            {"file": beat.get("photo") or beat.get("clip"), "at": beat.get("at", a), "look": beat.get("look")}
+        ]
+        out = []
+        for pic in listed:
+            if not pic.get("file"):
+                continue
+            look = pic.get("look") or self.looks[self.pictures % len(self.looks)]
+            self.pictures += 1
+            out.append(dict(file=pic["file"], t=self.start(pic.get("at", a)), look=look))
+        return sorted(out, key=lambda p: p["t"])
+
     def build(self):
-        mode, behind_ok = self.style["captions"], self.style["behind"] != "never"
-        for n, beat in enumerate(self.plan["beats"]):
+        mode, wish = self.style["captions"], self.style["behind"]
+        for beat in self.plan["beats"]:
             a, b = beat["say"]
             strong = set(beat.get("strong", []))
-            ceiling = None
-            path = beat.get("photo") or beat.get("clip")
-            if path:
-                at = beat.get("at", a)
-                want = beat.get("behind", self.style["behind"] == "lots" or (behind_ok and self.pictures % 2 == 0))
-                look = beat.get("look") or self.looks[self.pictures % len(self.looks)]
-                got = self.add_picture(path, self.start(at), self.stop(b), bool(want and behind_ok), look)
-                ceiling = got if isinstance(got, (int, float)) else None
-                self.sounds.append((self.start(at), "swoosh"))
+            pictures, self.area = self.beat_pictures(beat), None
+            first = pictures[0]["t"] if pictures else None
+            if pictures:
+                behind = beat.get("behind", wish == "lots" or (wish == "some" and self.scenes % 2 == 0))
+                area = self.add_scene(pictures, self.stop(b), bool(behind) and wish != "never", beat.get("layout"))
+                # words said before the pictures arrive use the same place, so nothing jumps
+                self.area = area
+                self.sounds += [(p["t"], "swoosh") for p in pictures]
             if beat.get("emoji") and self.style["emoji"] != "none":
-                at = beat.get("emojiAt", max(strong) if strong else b)
-                self.add_emoji(beat["emoji"], self.start(at), self.stop(b), behind_ok)
-                self.sounds.append((self.start(at), "pop"))
+                at = self.start(beat.get("emojiAt", max(strong) if strong else b))
+                self.add_emoji(beat["emoji"], at, self.stop(b), not pictures)
+                self.sounds.append((at, "pop"))
+                if not pictures and not isinstance(beat["emoji"], list):
+                    top, low = self.zone()
+                    self.area = (top, min(low, self.face["top"] - 225)) if self.face["top"] - 225 - top > 200 else None
             if mode == "all-fast":
-                self.say_fast(a, b, strong, ceiling)
+                self.say_fast(a, b, strong)
             elif mode == "all-calm":
-                self.say_calm(a, b, strong, ceiling)
+                self.say_calm(a, b, strong)
             else:
-                self.say_center(a, b, strong, mode, ceiling)
+                self.say_center(a, b, strong, mode)
+            self.area = None
             for i in sorted(strong)[:1]:
-                self.zooms.append((self.start(i), self.stop(b)))
+                if first is None or self.start(i) >= first - 1:
+                    self.zooms.append((self.start(i), self.stop(b)))
         self.items.sort(key=lambda e: e.z)
         return self
+
+    def lean(self, t):
+        """how far the pictures and emojis pull to one side at t, in pixels (0 = balanced)"""
+        on = [e for e in self.items if isinstance(e, Sprite) and e.on(t)]
+        weights = [(e.w * e.w * e.images[0].height() / e.images[0].width(), e.place(t, 0)[0] - 540) for e in on]
+        total = sum(w for w, _ in weights)
+        return sum(w * x for w, x in weights) / total if total else 0.0
 
     def problems(self):
         """words touching words, words on the face, words outside the safe area"""
         texts, out, f = [e for e in self.items if isinstance(e, Text)], [], self.face
+        t, told = 0.0, -9.0
+        while t < self.end:
+            pull = self.lean(t)
+            # pictures of one scene may arrive 0.2 s apart
+            if abs(pull) > 70 and abs(self.lean(t + 0.25)) > 70 and t - told > 1:
+                out.append(f"{t:.2f}s the pictures lean {'right' if pull > 0 else 'left'} ({abs(pull):.0f} px)")
+                told = t
+            t += 0.1
+        for e in self.items:
+            if not isinstance(e, Sprite) or e.behind or e.w >= 1080 or not f["found"]:
+                continue
+            h, rise = e.w * e.images[0].height() / e.images[0].width(), 520 if e.enter == "up" else 0
+            inside = e.x - e.w / 2 < f["x"] + f["w"] and f["x"] < e.x + e.w / 2
+            if inside and e.y - h / 2 < f["chin"] and e.y + h / 2 + rise > f["y"]:
+                out.append(f"{e.t0:.2f}s a picture covers the face")
         for i, one in enumerate(texts):
             x0, y0, x1, y1 = one.bounds()
             if x0 < 40 or x1 > 1040 or y0 < 200 or y1 > 1560:

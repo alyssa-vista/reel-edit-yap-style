@@ -28,8 +28,10 @@ Run every script from the project folder with the `.venv` Python that setup prin
    - GIF styles that use films: `S/find.py "..." --kind gif --style <id>` lists films, then `S/clips.py look <film> sheet.jpg`, look at the sheet, then `S/clips.py cut <film> <second> 2.5 work/<name>/pics/x.mp4`.
    - Nothing good? Try simpler words, another chosen style, or leave the beat with words only. A wrong picture is worse than none.
 5. Write `work/<name>/plan.json`:
-   `{"fix": {"13": "lines"}, "beats": [{"say": [0, 3], "strong": [2], "clip": "work/x/pics/a.mp4", "at": 2, "behind": true, "look": "frame", "emoji": "💔"}]}`
-   `say` = first and last word number. `at` = the word the picture lands on. `photo` or `clip`, not both. `look`, `behind`, `emoji`, `wall` (1 = wall as filmed, lower = darker) are optional.
+   `{"fix": {"13": "lines"}, "beats": [{"say": [0, 3], "strong": [2], "pictures": [{"file": "work/x/pics/a.mp4", "at": 2, "look": "frame"}], "layout": "fan", "emoji": "💔"}]}`
+   `say` = first and last word number (cover every word of the video). `at` = the word a picture lands on. `look`, `layout`, `behind`, `emoji` (one, or a list of two), `wall` (1 = wall as filmed, lower = darker) are optional.
+   BALANCE, always: one picture = in the middle. Two = mirrored left and right (`sides` low beside the body, `pair` above the head). Three = `fan` (stacked, for lists: "the breakup, the job, the city") or `triangle`. Never more than three. Never one picture in a corner. Change the layout from beat to beat.
+   After a clip is cut, look at its "check.jpg": the moment is often a few seconds earlier than the sheet says.
 6. `S/make.py work/<name> check`. Fix every line it prints. Then `S/make.py work/<name> stills <times>` and LOOK: right picture, right word, readable, nothing on the face.
 7. Show the user one sheet of stills and a numbered list: number, time, word, picture. Ask: "Want to change any number, or should I make the video?" Wait for yes.
 8. `S/make.py work/<name> video`. It saves `final/<name> v1.mp4`, then v2, and never replaces one.
