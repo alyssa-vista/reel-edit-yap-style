@@ -7,7 +7,8 @@ Turn a talking video into a yap-style reel with Claude Code. You talk. Claude wr
 ## What you need
 
 - The Claude desktop app with a paid plan (the Code tab needs one)
-- A Mac. Windows is planned and not tested yet
+- A Mac with macOS 14 or newer (tested on Apple silicon). Windows is planned and not tested yet
+- About 2 GB of free space
 - No accounts and no keys for pictures
 
 ## Start
@@ -22,6 +23,8 @@ Install https://github.com/alyssa-vista/reel-edit-yap-style into this folder and
 
 4. Click your answers in the survey. You never have to type.
 5. Put your video in the `raw` folder and say `edit my video`.
+
+**Claude, if you were asked to install this:** put these files straight into the folder the user opened, then follow "First time" in [SKILL.md](.claude/skills/yap/SKILL.md).
 
 ## Change anything by saying it
 
@@ -41,7 +44,7 @@ Claude follows the steps in [SKILL.md](.claude/skills/yap/SKILL.md): it chooses 
 
 ## Safety
 
-- Your video never leaves your computer through this kit. Claude itself works under Anthropic's own terms.
+- Your video file stays on your computer. To do the edit, Claude reads your words and looks at still frames, under Anthropic's own terms.
 - The survey page only answers to your own computer, uses a one-time address, and accepts only answers from its own list.
 - No telemetry, no passwords, no keys.
 - Found a problem? See [SECURITY](SECURITY.md).

@@ -229,24 +229,34 @@ button:focus-visible {
 .st.lots .p,
 .st.some .p {
   z-index: 1;
-  margin-left: -90px;
   animation: slide 2.6s infinite alternate;
-}
-.st.lots .p2 {
-  display: block;
-  margin-left: 6px;
-  top: 40px;
 }
 .p2 {
   display: none;
 }
+/* one picture sits in the middle, two are a mirrored pair */
+.st.some .p {
+  top: 26px;
+  margin-left: -52px;
+}
+.st.lots .p {
+  margin-left: -110px;
+}
+.st.lots .p2 {
+  display: block;
+  margin-left: 6px;
+}
 .st.never .p {
   z-index: 3;
-  left: 8px;
-  top: 14px;
+  width: 84px;
+  height: 64px;
+  top: 84px;
+  left: 14px;
 }
-.st.some .p {
-  top: 30px;
+.st.never .p2 {
+  display: block;
+  left: auto;
+  right: 14px;
 }
 @keyframes slide {
   from {

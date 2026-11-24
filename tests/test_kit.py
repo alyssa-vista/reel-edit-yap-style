@@ -66,6 +66,21 @@ class Lists(unittest.TestCase):
                     self.assertIsNone(bad.search(read(os.path.join(d, f))), f)
 
 
+class Setup(unittest.TestCase):
+    def test_python_choice(self):
+        sys.path.insert(0, os.path.join(K, "scripts"))
+        import setup
+
+        for v in ((3, 11), (3, 13), (3, 14)):
+            self.assertTrue(setup.fits(v))
+        for v in ((3, 9), (3, 10), (3, 15), (4, 0)):  # too old or too new: setup brings its own
+            self.assertFalse(setup.fits(v))
+
+    def test_pinned(self):
+        for line in read(os.path.join(ROOT, "requirements.txt")).split():
+            self.assertRegex(line, r"^[\w.-]+==[\w.]+$")
+
+
 class Survey(unittest.TestCase):
 
     def setUp(self):

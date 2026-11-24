@@ -9,3 +9,4 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions: [Sem
 - Picture and GIF finder with no sign-ups
 - Word timing, person cutout, five caption styles, five photo looks, emojis, zooms and sound effects
 - Brand colors by hex code or brand kit file
+- Setup brings its own Python when the computer's is too old or too new, and checks for macOS 14
