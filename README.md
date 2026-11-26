@@ -56,4 +56,8 @@ The finder keeps files marked public domain or CC0. Three styles are different: 
 
 ## Contributing
 
-See [CONTRIBUTING](CONTRIBUTING.md). No licence has been chosen yet: all rights reserved. Not affiliated with or endorsed by Anthropic.
+See [CONTRIBUTING](CONTRIBUTING.md).
+
+## License
+
+[MIT](LICENSE) for the kit's own code and pages. Pictures, clips, fonts and emojis it finds keep their own terms: see [ATTRIBUTIONS](ATTRIBUTIONS.md). Not affiliated with or endorsed by Anthropic.
