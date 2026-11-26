@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions: [Sem
 First public version. Tested on a Mac; Windows not tested yet.
 
 ### Added
-- Click-only setup survey (11 questions)
+- Click-only setup survey (12 questions)
 - Picture and GIF finder with no sign-ups
 - Word timing, person cutout, five caption styles, five photo looks, emojis, zooms and sound effects
 - Brand colors by hex code or brand kit file
