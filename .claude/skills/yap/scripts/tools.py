@@ -31,6 +31,24 @@ def run(a, **k):
     return r
 
 
+def readable(video, work):
+    """Some cameras (Sony .MP4 files, for one) write a header FFmpeg cannot open. On a Mac, Apple's own avconvert rewraps
+    the file as it is (no re-encoding, same quality) into work/<name>/source.mov. Returns a path FFmpeg can read."""
+    ok = lambda f: subprocess.run([FFPROBE, "-v", "error", "-show_entries", "format=duration", f], capture_output=True).returncode == 0
+    if ok(video):
+        return video
+    out = os.path.join(work, "source.mov")
+    if os.path.isfile(out) and os.path.getmtime(out) >= os.path.getmtime(video) and ok(out):
+        return out
+    if sys.platform == "darwin" and shutil.which("avconvert"):
+        print("this camera file needs rewrapping first (no quality lost)", flush=True)
+        os.makedirs(work, exist_ok=True)
+        r = subprocess.run(["avconvert", "--preset", "PresetPassthrough", "--source", video, "--output", out, "--replace"], capture_output=True)
+        if r.returncode == 0 and ok(out):
+            return out
+    sys.exit("This video file cannot be opened. Export or save it again as MP4 or MOV from the camera or phone app, then try again.")
+
+
 def load(p):
     with open(p, encoding="utf-8") as f:
         return json.load(f)

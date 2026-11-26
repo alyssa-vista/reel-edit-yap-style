@@ -8,7 +8,7 @@ Turn a talking video into a yap-style reel with Claude Code. You talk. Claude cu
 
 - The Claude desktop app with a paid plan (the Code tab needs one)
 - A Mac with macOS 14 or newer (tested on Apple silicon). Windows is planned and not tested yet
-- About 2 GB of free space
+- About 2 GB of free space, plus the size of your video while it is trimmed (camera files are copied once, then the copy is removed)
 - No accounts and no keys for pictures
 
 ## Start

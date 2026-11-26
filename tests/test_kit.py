@@ -307,6 +307,46 @@ class Trim(unittest.TestCase):
         hiss_end = 0.5 + 0.4 + 0.15
         self.assertGreaterEqual(trim.tail(trim.Levels(x), w, 0), hiss_end - 0.01)
 
+    def lines(self, *sentences, gap=0.6, sure=0.9):
+        """words for whole sentences, with a pause between sentences"""
+        out, t = [], 0.0
+        for snt in sentences:
+            for w in snt.split():
+                out.append(dict(i=len(out), word=w, start=round(t, 2), end=round(t + 0.3, 2), sure=sure))
+                t += 0.35
+            t += gap
+        return out
+
+    def kept(self, w):
+        return " ".join(x["word"] for a, b in trim.suggest(w, [], "tight", [])["keep"] for x in w[a : b + 1])
+
+    def test_full_retake_keeps_the_last_take(self):
+        w = self.lines("I put the whole thing in a free guide, comment yap and I'll send you the free.", "I put the whole thing.",
+                       "I put the whole thing in a free guide, comment yap and I'll send it to your DMs.")
+        self.assertEqual(self.kept(w), "I put the whole thing in a free guide, comment yap and I'll send it to your DMs.")
+
+    def test_short_line_redone_right_away(self):
+        w = self.lines("Claude edited this reels for me.", "Claude made these reels for me.")
+        self.assertEqual(self.kept(w), "Claude made these reels for me.")
+
+    def test_lines_repeated_on_purpose_stay(self):
+        for pair in (("It was never supposed to make sense yet.", "It was supposed to make sense later."),
+                     ("You're not unsettled because something is wrong with you.", "You're unsettled because something in you is ready.")):
+            w = self.lines(*pair)
+            self.assertEqual(self.kept(w), " ".join(pair))
+
+    def test_stumble_and_invented_words_go(self):
+        w = self.lines("Co -op edit!", "Claude made these reels for me.", "Thanks for watching!", "You know those yapping videos?")
+        for x in w[:3]:
+            x["sure"] = 0.3
+        for x in w[9:12]:
+            x["sure"] = 0.5
+        self.assertEqual(self.kept(w), "Claude made these reels for me. You know those yapping videos?")
+
+    def test_breath_after_a_word_is_not_kept(self):
+        x, w = talk([("-", 0.5), ("w", 0.4), ("-", 0.04), ("s", 0.6), ("-", 0.6), ("w", 0.4), ("-", 0.5)])
+        self.assertLessEqual(trim.tail(trim.Levels(x), w, 0), w[0]["end"] + 0.29)
+
     def test_runs_straight_on(self):
         x, w = talk([("-", 0.5), ("w", 0.4), ("s", 0.1), ("w", 0.4), ("-", 0.5)])
         t = trim.tail(trim.Levels(x), w, 0)

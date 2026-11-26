@@ -12,6 +12,11 @@
     "say": "Restarts, ums and every pause"
    },
    {
+    "id": "fast",
+    "name": "Tight, and talk a bit faster",
+    "say": "Like most yap reels: 1.15x, same voice"
+   },
+   {
     "id": "natural",
     "name": "Yes, but keep my pauses",
     "say": "Restarts, ums and long silences"

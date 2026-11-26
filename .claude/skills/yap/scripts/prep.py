@@ -16,7 +16,7 @@ import sys
 import cv2
 import numpy as np
 
-from tools import FFMPEG, HERE, ROOT, probe, run, save
+from tools import FFMPEG, HERE, ROOT, load, probe, readable, run, save
 
 W, H = 1080, 1920
 
@@ -82,7 +82,7 @@ def make_plate(video, work, info):
     )
 
 
-def listen(work, model, lang):
+def listen(work, model, lang, names="Claude"):
     from faster_whisper import WhisperModel
 
     whisper = WhisperModel(model, device="cpu", compute_type="int8")
@@ -91,7 +91,7 @@ def listen(work, model, lang):
         [FFMPEG, "-v", "error", "-i", os.path.join(work, "voice.wav"), "-ac", "1", "-ar", "16000", "-f", "f32le", "-"]
     )
     audio = np.frombuffer(raw.stdout, np.float32)
-    segments, _ = whisper.transcribe(audio, language=lang, word_timestamps=True, condition_on_previous_text=False)
+    segments, _ = whisper.transcribe(audio, language=lang, word_timestamps=True, condition_on_previous_text=False, hotwords=names or None)
     words = [
         dict(i=0, word=w.word.strip(), start=round(w.start, 3), end=round(w.end, 3), sure=round(w.probability, 2))
         for s in segments
@@ -121,11 +121,15 @@ def read_back(work, words):
     n = lambda w: re.sub(r"[^a-z0-9']", "", w.lower())
     want = [n(w) for w in open(p, encoding="utf-8").read().split()]
     got = [n(w["word"]) for w in words]
+    tj = os.path.join(work, "trim.json")
+    joins = load(tj).get("joins") if os.path.isfile(tj) else None
     out = []
     for op, a0, a1, b0, b1 in difflib.SequenceMatcher(None, want, got, autojunk=False).get_opcodes():
         if op != "equal":
             at = words[min(b0, len(words) - 1)]["start"] if words else 0
-            out.append(f"near {int(at // 60)}:{at % 60:04.1f}: meant \"{' '.join(want[a0:a1])}\", heard \"{' '.join(got[b0:b1])}\"")
+            if joins is not None and not any(abs(at - j) < 0.8 for j in joins):
+                continue  # the listener heard a word a little differently, away from any cut: not a cut problem
+            out.append(f"near {int(at // 60)}:{at % 60:04.1f}: \"{' '.join(want[a0:a1])}\" heard as \"{' '.join(got[b0:b1])}\"")
     return out
 
 
@@ -245,12 +249,13 @@ if __name__ == "__main__":
     a.add_argument("video")
     a.add_argument("--model", default="small.en")
     a.add_argument("--lang", default="en")
+    a.add_argument("--names", default="Claude", help="names the listener should expect, comma separated")
     a.add_argument("--untrimmed", action="store_true", help="use the raw video even when a trimmed one exists")
     a = a.parse_args()
     work = os.path.join("work", os.path.splitext(os.path.basename(a.video))[0])
     os.makedirs(work, exist_ok=True)
     trimmed = os.path.join(work, "trimmed.mov")
-    source = trimmed if os.path.isfile(trimmed) and not a.untrimmed else a.video
+    source = trimmed if os.path.isfile(trimmed) and not a.untrimmed else readable(a.video, work)
     if source == trimmed:
         print("using the trimmed video", flush=True)
     info = probe(source)
@@ -260,7 +265,7 @@ if __name__ == "__main__":
     print("1 of 4  getting the video ready", flush=True)
     make_plate(source, work, info)
     print("2 of 4  listening", flush=True)
-    words = listen(work, a.model, a.lang)
+    words = listen(work, a.model, a.lang, a.names)
     print("3 of 4  finding you in the picture (the slow part)", flush=True)
     find_person(work, info["fps"])
     print("4 of 4  finding your face", flush=True)
@@ -269,4 +274,4 @@ if __name__ == "__main__":
     unsure = [f"{w['i']}:{w['word']}" for w in words if w["sure"] < 0.5]
     diff = read_back(work, words) if source == trimmed else []
     print(json.dumps(dict(work=work, words=len(words), seconds=round(info["seconds"], 1), not_sure_about=unsure,
-                          trim_check=diff[:12] or ("all words where they should be" if source == trimmed else "not trimmed"))))
+                          heard_differently_near_cuts=diff[:12])))  # the cuts themselves were checked by time in trim.py
