@@ -22,7 +22,13 @@ If you were asked to install this from GitHub: the files go straight into the fo
 
 ## Edit a video
 
-1. `S/prep.py raw/<video>` (add `--lang es` and `--model small` for another language). Read `work/<name>/lines.txt`: every word has a number.
+0. Trim first, unless `trim` in `my-style.json` is `none` (it is cut already) or they say so.
+   - `S/trim.py listen raw/<video>`. Read `work/<name>/takes.txt`: every word numbered, with pauses, restarts (`<<AGAIN`), ums (`*`) and "sound with no words".
+   - `work/<name>/cut.json` holds a first suggestion: `keep` (ranges of word numbers, in order), `drop_sounds` (seconds), `pause_after` (word numbers whose pause stays: a beat before a payoff). Read the words and fix it like an editor: keep the last clean take of each line, cut false starts ("I was, I mean"), a "wait, let me start again", the reaching for the phone at the end. A line said twice ON PURPOSE stays. Never cut a word only because it is "like" or "so".
+   - `S/trim.py cut work/<name>`. Fix every `CHECK:` line (a cut inside a word, a piece shorter than 0.2 s) and cut again. `note:` lines are fine.
+   - Tell them in plain words: what was cut (count restarts, ums, pauses), the old and new length, and where to watch it (`work/<name>/trimmed.mov`). Ask: "Want anything back, or should I find the pictures?" Wait. If they want a part back, change `keep` and cut again.
+   - After this, word numbers and times are the TRIMMED video's.
+1. `S/prep.py raw/<video>` (add `--lang es` and `--model small` for another language; the same for trim.py). It uses the trimmed video by itself. If `trim_check` lists a word missing or doubled near a cut, move that cut and trim again. Read `work/<name>/lines.txt`: every word has a number.
 2. Fix words the computer misheard (names, places) in the plan's `fix`. If you are not sure of a word, ask.
 3. Pick the beats: one thought each. For each beat choose the 1 or 2 strongest words.
 4. Choose pictures. `busy` in the style sets how many: calm = one per 8 s, medium = 4 s, full = 2 s. For each, decide what a camera could see ("empty chair"), never the feeling ("lonely"). Use only the styles they picked.
@@ -42,9 +48,11 @@ If you were asked to install this from GitHub: the files go straight into the fo
 
 "Change the photo at 0:12", "remove the emoji", "funnier GIF", "slower captions": change only that in the plan or in `my-style.json`, show a still, make the next version. Leave everything else alone.
 
+"Put back the part at 0:20" once the plan exists: change `keep` in `cut.json`, run trim.py cut and prep.py again, then move every word number in the plan to the same words in the new `lines.txt`, run check, and make the next version.
+
 ## Never
 
-- Never change, move or delete anything in `raw`. Never upload a video or a photo of the user.
+- Never change, move or delete anything in `raw`: trimming makes a new file in `work`. Never upload a video or a photo of the user.
 - Never use pictures of private people, children, violence, tragedy, religion used as decoration, or anything hateful or sexual. Old films can hold racist scenes: look before you use one.
 - Never use Pinterest, Google Images or any site that asks for a login, and never get around a block.
 - Never say a picture is free to use unless the result says public domain or CC0. If a result says "check rights", tell the user once, before the video is made.

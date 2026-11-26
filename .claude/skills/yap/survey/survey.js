@@ -11,6 +11,7 @@ const el = (t, c, txt) => {
   return e;
 };
 const DEF = {
+  trim: ['tight'],
   palette: ['#F1C92F', '#FFF4C1', '#FFFFFF'],
   font: ['Inter Tight'],
   accent: ['Instrument Serif:ital'],

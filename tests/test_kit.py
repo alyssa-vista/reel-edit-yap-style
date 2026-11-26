@@ -15,6 +15,7 @@ def load(*p):
 
 
 GOOD = dict(
+    trim=["tight"],
     palette=["#F1C92F", "#FFF4C1", "#FFFFFF"],
     font=["Poppins"],
     accent=["Caveat"],
@@ -237,6 +238,80 @@ class Balance(unittest.TestCase):
             a, b = [e for e in self.make(2, plan).items if isinstance(e, draw.Sprite)]
             self.assertAlmostEqual(a.x + b.x, 1080, delta=1)
             self.assertEqual((a.y, a.tilt), (b.y, -b.tilt))
+
+
+try:
+    import trim
+except (ImportError, SystemExit, NameError):
+    trim = None
+
+
+def talk(parts, sr=48000, seed=3):
+    """fake speech: ('w', seconds) is a loud word, ('s', seconds) a soft hiss like an s, ('-', seconds) room quiet"""
+    r, out, words, t = np.random.default_rng(seed), [], [], 0.0
+    for kind, d in parts:
+        n = int(d * sr)
+        x = r.standard_normal(n).astype(np.float32)
+        if kind == "w":
+            x = 0.08 * x + 0.15 * np.sin(np.arange(n) * 2 * np.pi * 180 / sr).astype(np.float32)
+            words.append(dict(i=len(words), word=f"w{len(words)}", start=round(t + 0.02, 3), end=round(t + d - 0.04, 3)))
+        elif kind == "s":
+            x = 0.03 * np.diff(x, prepend=0).astype(np.float32)
+        else:
+            x = 0.0004 * x
+        out.append(x)
+        t += d
+    return np.concatenate(out), words
+
+
+@unittest.skipUnless(trim, "the video tools are not installed here")
+class Trim(unittest.TestCase):
+    """mistakes and dead air come out, cuts land in the quiet, lines said twice on purpose stay"""
+
+    def words(self, text):
+        return [dict(i=i, word=w, start=i * 0.5, end=i * 0.5 + 0.4) for i, w in enumerate(text.split())]
+
+    def test_restart_keeps_the_last_take(self):
+        w = self.words("I felt so I felt so lost today.")
+        again = trim.restarts(w)
+        self.assertEqual(again[0][:2], (0, 3))
+        self.assertEqual(trim.suggest(w, again, "tight", [])["keep"], [[3, 7]])
+
+    def test_stutter_goes(self):
+        w = self.words("I I think so.")
+        self.assertEqual(trim.suggest(w, trim.restarts(w), "tight", [])["keep"], [[1, 3]])
+
+    def test_line_said_twice_on_purpose_stays(self):
+        w = self.words("You're not unsettled because something is wrong. You're unsettled because something is ready.")
+        again = trim.restarts(w)
+        self.assertTrue(again)
+        self.assertEqual(trim.suggest(w, again, "tight", [])["keep"], [[0, len(w) - 1]])
+
+    def test_um_goes(self):
+        w = self.words("So um I think")
+        self.assertEqual(trim.suggest(w, [], "tight", [])["keep"], [[0, 0], [2, 3]])
+
+    def test_dead_air_is_shortened_and_cuts_are_quiet(self):
+        x, w = talk([("-", 0.5), ("w", 0.4), ("-", 0.12), ("w", 0.4), ("-", 1.6), ("w", 0.4), ("-", 0.5)])
+        lv = trim.Levels(x)
+        sp = trim.spans(lv, w, dict(keep=[[0, 2]], pace="tight"))
+        kept = sum(b - a for a, b in sp)
+        self.assertLess(kept, 1.8)  # 1.2 s of words + a short gap + edges: the 1.6 s pause is nearly gone
+        self.assertGreater(kept, 1.4)
+        self.assertEqual(trim.check(trim.Levels(x), sp, w)[0], [])
+        natural = trim.spans(trim.Levels(x), w, dict(keep=[[0, 2]], pace="natural"))
+        self.assertGreater(sum(b - a for a, b in natural), kept)
+
+    def test_soft_ending_is_kept(self):
+        x, w = talk([("-", 0.5), ("w", 0.4), ("s", 0.15), ("-", 0.6), ("w", 0.4), ("-", 0.5)])
+        hiss_end = 0.5 + 0.4 + 0.15
+        self.assertGreaterEqual(trim.tail(trim.Levels(x), w, 0), hiss_end - 0.01)
+
+    def test_runs_straight_on(self):
+        x, w = talk([("-", 0.5), ("w", 0.4), ("s", 0.1), ("w", 0.4), ("-", 0.5)])
+        t = trim.tail(trim.Levels(x), w, 0)
+        self.assertGreaterEqual(t, 0.5 + 0.4 + 0.08)  # keeps the hiss
+        self.assertLessEqual(t, 0.5 + 0.4 + 0.1 + 0.01)  # and stops before the next word
 
 
 if __name__ == "__main__":

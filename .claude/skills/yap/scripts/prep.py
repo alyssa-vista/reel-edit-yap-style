@@ -2,6 +2,8 @@
 
 Gets one talking video ready. Everything stays on this computer.
 Writes work/<name>/: plate.mp4 (1080x1920), voice.wav, words.json, lines.txt, person.mp4 (who is in front), face.json
+When trim.py has made work/<name>/trimmed.mov, that is used instead of the raw video, and the words are checked against
+what the trim kept (a missing or doubled word near a cut shows up here).
 """
 
 import argparse
@@ -106,6 +108,25 @@ def listen(work, model, lang):
     with open(os.path.join(work, "lines.txt"), "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
     return words
+
+
+def read_back(work, words):
+    """compare what is heard in the trimmed video with the words the trim meant to keep"""
+    import difflib
+    import re
+
+    p = os.path.join(work, "expected.txt")
+    if not os.path.isfile(p):
+        return []
+    n = lambda w: re.sub(r"[^a-z0-9']", "", w.lower())
+    want = [n(w) for w in open(p, encoding="utf-8").read().split()]
+    got = [n(w["word"]) for w in words]
+    out = []
+    for op, a0, a1, b0, b1 in difflib.SequenceMatcher(None, want, got, autojunk=False).get_opcodes():
+        if op != "equal":
+            at = words[min(b0, len(words) - 1)]["start"] if words else 0
+            out.append(f"near {int(at // 60)}:{at % 60:04.1f}: meant \"{' '.join(want[a0:a1])}\", heard \"{' '.join(got[b0:b1])}\"")
+    return out
 
 
 def person_tool(work):
@@ -224,15 +245,20 @@ if __name__ == "__main__":
     a.add_argument("video")
     a.add_argument("--model", default="small.en")
     a.add_argument("--lang", default="en")
+    a.add_argument("--untrimmed", action="store_true", help="use the raw video even when a trimmed one exists")
     a = a.parse_args()
     work = os.path.join("work", os.path.splitext(os.path.basename(a.video))[0])
     os.makedirs(work, exist_ok=True)
-    info = probe(a.video)
+    trimmed = os.path.join(work, "trimmed.mov")
+    source = trimmed if os.path.isfile(trimmed) and not a.untrimmed else a.video
+    if source == trimmed:
+        print("using the trimmed video", flush=True)
+    info = probe(source)
     if not info["sound"]:
         sys.exit("This video has no sound, so there are no words to follow.")
     info["fps"] = min((24, 25, 30, 50, 60), key=lambda f: abs(f - info["fps"]))
     print("1 of 4  getting the video ready", flush=True)
-    make_plate(a.video, work, info)
+    make_plate(source, work, info)
     print("2 of 4  listening", flush=True)
     words = listen(work, a.model, a.lang)
     print("3 of 4  finding you in the picture (the slow part)", flush=True)
@@ -241,4 +267,6 @@ if __name__ == "__main__":
     info["face"] = find_face(work, info["fps"])
     save(os.path.join(work, "info.json"), dict(info, video=os.path.abspath(a.video)))
     unsure = [f"{w['i']}:{w['word']}" for w in words if w["sure"] < 0.5]
-    print(json.dumps(dict(work=work, words=len(words), seconds=round(info["seconds"], 1), not_sure_about=unsure)))
+    diff = read_back(work, words) if source == trimmed else []
+    print(json.dumps(dict(work=work, words=len(words), seconds=round(info["seconds"], 1), not_sure_about=unsure,
+                          trim_check=diff[:12] or ("all words where they should be" if source == trimmed else "not trimmed"))))

@@ -1,6 +1,6 @@
 # reel-edit-yap-style
 
-Turn a talking video into a yap-style reel with Claude Code. You talk. Claude writes down every word, finds photos, GIFs and emojis that match, and puts them on the exact word, even behind your head.
+Turn a talking video into a yap-style reel with Claude Code. You talk. Claude cuts your restarts, ums and dead air, writes down every word, finds photos, GIFs and emojis that match, and puts them on the exact word, even behind your head.
 
 > **Status: early.** It works on a Mac. Windows is not tested yet. See [CHANGELOG](CHANGELOG.md).
 
@@ -22,7 +22,7 @@ Install https://github.com/alyssa-vista/reel-edit-yap-style into this folder and
 ```
 
 4. Click your answers in the survey. You never have to type.
-5. Put your video in the `raw` folder and say `edit my video`.
+5. Put your video in the `raw` folder and say `edit my video`. Messy takes are fine: Claude cuts the mistakes first and shows you.
 
 **Claude, if you were asked to install this:** put these files straight into the folder the user opened, then follow "First time" in [SKILL.md](.claude/skills/yap/SKILL.md).
 
@@ -35,6 +35,7 @@ Install https://github.com/alyssa-vista/reel-edit-yap-style into this folder and
 | Step | What does it |
 |---|---|
 | Your style | `survey.py` opens a page on your own computer and saves `my-style.json` |
+| Mistakes | `trim.py` finds restarts, ums and pauses, cuts in the quiet between words, and checks every cut by ear before anything is drawn |
 | Pictures | `find.py` uses one free tool per style: Wikimedia Commons, Openverse, the Cleveland Museum of Art, NASA, memegen.link and Iconify. `clips.py` finds and cuts moving clips from the Internet Archive |
 | Words | `prep.py` writes down every word and its time with [faster-whisper](https://github.com/SYSTRAN/faster-whisper), on your computer |
 | You, cut out | Apple Vision on a Mac, [rembg](https://github.com/danielgatis/rembg) on other computers |

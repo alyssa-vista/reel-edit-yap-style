@@ -1,5 +1,29 @@
 [
  {
+  "id": "trim",
+  "q": "Should Claude cut your mistakes?",
+  "help": "Restarts, ums and dead air. You see the cut before anything else is added.",
+  "type": "big",
+  "pick": 1,
+  "options": [
+   {
+    "id": "tight",
+    "name": "Yes, cut it tight",
+    "say": "Restarts, ums and every pause"
+   },
+   {
+    "id": "natural",
+    "name": "Yes, but keep my pauses",
+    "say": "Restarts, ums and long silences"
+   },
+   {
+    "id": "none",
+    "name": "No, I cut it myself",
+    "say": "Your video stays as it is"
+   }
+  ]
+ },
+ {
   "id": "palette",
   "q": "Your brand colors",
   "help": "Pick a set, type your own hex codes, or upload your brand kit.",
